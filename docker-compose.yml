@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  vote:
+    image: esiea-ressources/vote
+    ports:
+      - "5002:80"
+    networks:
+      - front-tier
+      - back-tier
+
+  result:
+    image: esiea-ressources/result
+    ports:
+      - "5001:80"
+    networks:
+      - front-tier
+      - back-tier
+
+  worker:
+    image: esiea-ressources/worker
+    networks:
+      - back-tier
+
+  seed-data:
+    image: esiea-ressources/seed-data
+    networks:
+      - front-tier
+    depends_on:
+      - vote
+
+  db:
+    image: postgres:16.1
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: postgres
+    networks:
+      - back-tier
+
+  redis:
+    image: redis:latest
+    networks:
+      - back-tier
+
+networks:
+  back-tier:
+  front-tier:
+
+volumes:
+  db-data:
+
